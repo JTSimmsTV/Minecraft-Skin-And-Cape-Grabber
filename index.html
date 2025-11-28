@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Minecraft Skin + Cape + OptiFine Cape</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    img { max-width: 200px; margin: 10px; }
+    input, button { padding: 8px; margin: 5px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<h1>Minecraft Skin & Capes Lookup</h1>
+
+<input id="username" placeholder="Enter Java username">
+<button onclick="lookup()">Get Skin & Capes</button>
+
+<div id="result"></div>
+
+<script>
+async function lookup() {
+  const name = document.getElementById("username").value.trim();
+  const result = document.getElementById("result");
+  result.innerHTML = "Loading...";
+
+  const corsProxy = "https://corsproxy.io/?"; // CORS proxy workaround
+
+  try {
+    // 1️⃣ Get UUID from Mojang API
+    const uuidRes = await fetch(corsProxy + `https://api.mojang.com/users/profiles/minecraft/${name}`);
+    if (!uuidRes.ok) {
+      result.innerHTML = "❌ Username not found (Java Edition only)";
+      return;
+    }
+    const uuidData = await uuidRes.json();
+    const uuid = uuidData.id;
+
+    // 2️⃣ Get Mojang textures (skin + official cape)
+    const texRes = await fetch(corsProxy + `https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
+    const texData = await texRes.json();
+
+    const encoded = texData.properties[0].value;
+    const decoded = JSON.parse(atob(encoded));
