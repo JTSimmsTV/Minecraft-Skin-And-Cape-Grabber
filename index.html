@@ -1,43 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Minecraft Skin + Cape + OptiFine Cape</title>
+  <meta charset="UTF-8">
+  <title>Minecraft Skin Grabber</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    img { max-width: 200px; margin: 10px; }
-    input, button { padding: 8px; margin: 5px; font-size: 16px; }
+    body { font-family: Arial; text-align: center; background: #1e1e1e; color: white; padding-top: 40px; }
+    input { padding: 10px; width: 250px; font-size: 16px; }
+    button { padding: 10px 15px; font-size: 16px; margin-left: 5px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius:5px;}
+    img { margin-top: 20px; border: 2px solid white; border-radius:6px; }
   </style>
 </head>
 <body>
 
-<h1>Minecraft Skin & Capes Lookup</h1>
+<h1>Minecraft Skin Grabber</h1>
 
-<input id="username" placeholder="Enter Java username">
-<button onclick="lookup()">Get Skin & Capes</button>
+<input id="username" placeholder="Enter username">
+<button onclick="loadSkin()">Get Skin</button>
 
 <div id="result"></div>
 
 <script>
-async function lookup() {
+function loadSkin() {
   const name = document.getElementById("username").value.trim();
-  const result = document.getElementById("result");
-  result.innerHTML = "Loading...";
+  const out = document.getElementById("result");
 
-  const corsProxy = "https://corsproxy.io/?"; // CORS proxy workaround
+  if (!name) {
+    out.innerHTML = "Please enter a username.";
+    return;
+  }
 
-  try {
-    // 1️⃣ Get UUID from Mojang API
-    const uuidRes = await fetch(corsProxy + `https://api.mojang.com/users/profiles/minecraft/${name}`);
-    if (!uuidRes.ok) {
-      result.innerHTML = "❌ Username not found (Java Edition only)";
-      return;
-    }
-    const uuidData = await uuidRes.json();
-    const uuid = uuidData.id;
+  // Skin URL (mc-heads.net works username-only)
+  const skinURL = `https://mc-heads.net/skin/${encodeURIComponent(name)}`;
 
-    // 2️⃣ Get Mojang textures (skin + official cape)
-    const texRes = await fetch(corsProxy + `https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
-    const texData = await texRes.json();
+  out.innerHTML = `
+    <h2>${name}'s Skin</h2>
+    <img src="${skinURL}" alt="Skin" width="200" 
+         onerror="this.src=''; out.innerHTML='Username not found';">
+  `;
+}
+</script>
 
-    const encoded = texData.properties[0].value;
-    const decoded = JSON.parse(atob(encoded));
+</body>
+</html>
